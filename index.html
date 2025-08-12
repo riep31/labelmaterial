@@ -86,6 +86,19 @@
             border: 1px solid black;
         }
 
+        /* Style untuk input di header tabel */
+        .table-title-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            padding: 1px;
+            outline: none;
+        }
+
         .buttons {
             text-align: center;
             margin: 20px 0;
@@ -150,11 +163,14 @@
                 margin: 0;
                 padding: 0;
             }
-            .buttons {
+            .buttons, .controls {
                 display: none;
             }
             .delivery-note {
                 margin: 0;
+            }
+            .table-title-input {
+                pointer-events: none;
             }
         }
 
@@ -175,6 +191,36 @@
             color: #6c757d;
             margin-bottom: 15px;
         }
+
+        /* Controls section */
+        .controls {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .controls h5 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        .control-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+
+        .control-group input {
+            width: 200px;
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -182,10 +228,6 @@
         <!-- Info Section -->
         <div class="info-section">
             <h4>Label Material QAQC - PT. DAGSAP ENDURA EATORE</h4>
-            <div class="param-info">
-                <strong>Parameter URL yang tersedia:</strong><br>
-                ?namaMaterial=...&manufactured=...&supplier=...&kodeProduksi=...&tglDatang=...&jumlah=...&statusHalal=...&pic=...
-            </div>
         </div>
 
         <!-- Label Preview -->
@@ -215,7 +257,9 @@
                 <table class='note-table'>
                     <thead>
                         <tr>
-                            <th colspan='2'>Status</th>
+                            <th colspan='2'>
+                                <input type="text" class="table-title-input" id="tableTitle" placeholder="STATUS" onchange="saveTableTitle()">
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -240,6 +284,8 @@
             </div>
         </div>
 
+
+
         <!-- Buttons -->
         <div class="buttons">
             <button class="btn" onclick="printLabel()">Print Label</button>
@@ -249,24 +295,34 @@
     </div>
 
     <script>
-        // Hàm lấy parameters từ URL
+        // Fungsi untuk update judul tabel dari URL saja
+        function updateTableTitle() {
+            // Fungsi ini bisa dihapus jika tidak diperlukan
+        }
+
+        // Fungsi untuk menyimpan judul tabel dari URL
+        function saveTableTitle() {
+            // Data akan diambil dari URL parameter saja
+        }
+
+        // Fungsi lấy parameters từ URL
         function getUrlParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name) || '';
         }
 
-        // Hàm format tanggal
+        // Fungsi format tanggal
         function formatDate(dateString) {
             if (!dateString) return '';
             try {
                 const date = new Date(dateString);
                 return date.toLocaleDateString('id-ID');
             } catch (e) {
-                return dateString; // Return original if parsing fails
+                return dateString;
             }
         }
 
-        // Hàm format status halal
+        // Fungsi format status halal
         function formatStatusHalal(status) {
             const statusElement = document.getElementById('statusHalal');
             const cleanStatus = status?.toLowerCase().trim();
@@ -293,14 +349,14 @@
             }
         }
 
-        // Hàm generate QR Code URL
+        // Fungsi generate QR Code URL
         function generateQRCode(picData) {
             if (!picData) picData = 'PIC';
             const encodedData = encodeURIComponent(picData);
             return `https://api.qrserver.com/v1/create-qr-code/?data=${encodedData}&size=50x50`;
         }
 
-        // Hàm load data dari URL
+        // Fungsi load data dari URL
         function loadDataFromUrl() {
             // Load data dasar
             document.getElementById('namaMaterial').textContent = getUrlParameter('namaMaterial') || '-';
@@ -317,9 +373,13 @@
             // Generate QR Code
             const picData = getUrlParameter('pic') || 'PIC';
             document.getElementById('qrCode').src = generateQRCode(picData);
+
+            // Load judul tabel dari URL
+            const tableTitle = getUrlParameter('tableTitle') || 'STATUS';
+            document.getElementById('tableTitle').value = tableTitle;
         }
 
-        // Hàm generate sample data
+        // Fungsi generate sample data
         function generateSampleData() {
             const sampleUrl = new URL(window.location.origin + window.location.pathname);
             const params = {
@@ -330,7 +390,8 @@
                 tglDatang: '2024-02-01',
                 jumlah: '500 KG',
                 statusHalal: 'halal',
-                pic: 'Ahmad Yusuf - QC Inspector'
+                pic: 'Ahmad Yusuf - QC Inspector',
+                tableTitle: 'QUALITY STATUS'
             };
 
             Object.keys(params).forEach(key => {
@@ -340,12 +401,12 @@
             window.location.href = sampleUrl.toString();
         }
 
-        // Hàm print
+        // Fungsi print
         function printLabel() {
             window.print();
         }
 
-        // Hàm export PDF
+        // Fungsi export PDF
         function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const element = document.getElementById('printArea');
@@ -358,7 +419,6 @@
             }).then(function(canvas) {
                 const imgData = canvas.toDataURL('image/png');
                 
-                // Create PDF with custom size for label (92mm x 92mm)
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
@@ -370,7 +430,6 @@
                 
                 pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
                 
-                // Generate filename
                 const materialName = getUrlParameter('namaMaterial') || 'material';
                 const kodeProduksi = getUrlParameter('kodeProduksi') || 'unknown';
                 const fileName = `Label_${materialName.replace(/\s+/g, '_')}_${kodeProduksi}.pdf`;
@@ -382,23 +441,16 @@
             });
         }
 
-        // Hàm untuk mengupdate QR code ketika PIC berubah
-        function updateQRCode() {
-            const picData = document.getElementById('pic').value || 'PIC';
-            document.getElementById('qrCode').src = generateQRCode(picData);
-        }
-
         // Load data saat halaman dimuat
         window.onload = function() {
             loadDataFromUrl();
             
-            // Jika tidak ada parameter, tampilkan contoh
             if (!window.location.search) {
                 console.log('Tidak ada parameter URL. Klik "Sample Data" untuk melihat contoh.');
             }
         };
 
-        // Event listener untuk perubahan URL (jika menggunakan history API)
+        // Event listener untuk perubahan URL
         window.addEventListener('popstate', function(event) {
             loadDataFromUrl();
         });
