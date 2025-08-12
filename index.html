@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Material QAQC</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .delivery-note {
+            width: 92mm;
+            height: 92mm;
+            margin: 20px auto;
+            padding: 2px;
+            border: 2px solid black;
+            background-color: #fff;
+        }
+
+        .note-header {
+            text-align: center;
+            margin-bottom: 1px;
+            border-bottom: 2px solid black;
+        }
+
+        .note-header h6 {
+            margin: 0;
+        }
+
+        .note-details {
+            width: 88mm;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: left;
+            font-size: 13px;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-details div {
+            margin: 2px;
+        }
+
+        .note-table {
+            margin: 2px auto;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2px;
+        }
+
+        .note-table th {
+            text-align: center;
+            font-size: 20px; 
+            font-weight: 800; 
+            letter-spacing: 6px;
+            padding: 1px;
+            border: 1px solid black;
+            background-color: #fff;
+        }
+
+        .note-table td {
+            font-size: 12px;
+            padding: 2px;
+            border: 1px solid black;
+        }
+
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .status-halal {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-non-halal {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-unknown {
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+            .buttons {
+                display: none;
+            }
+            .delivery-note {
+                margin: 0;
+            }
+        }
+
+        .info-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-section h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .param-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Info Section -->
+        <div class="info-section">
+            <h4>Label Material QAQC - PT. DAGSAP ENDURA EATORE</h4>
+            <div class="param-info">
+                <strong>Parameter URL yang tersedia:</strong><br>
+                ?namaMaterial=...&manufactured=...&supplier=...&kodeProduksi=...&tglDatang=...&jumlah=...&statusHalal=...&pic=...
+            </div>
+        </div>
+
+        <!-- Label Preview -->
+        <div id="printArea">
+            <div class='delivery-note'>
+                <div class='note-header'>
+                    <div style='display: flex; align-items: center; justify-content: center;'>
+                        <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYyanHkNjy-MEGWx-yRWA8XiFF9HbWiLoGFY9HRkEpuBXKYGjxU_TMW2dK4ONcqKA4tg&usqp=CAU' 
+                             width='40' height='30' style='margin-right: 15px; padding: 1px;'>
+                        <h6 style='margin: 0;'>PT. DAGSAP ENDURA EATORE - DEPT QAQC</h6>
+                    </div>
+                </div>
+                
+                <div class='note-details'>
+                    <div>
+                        <div><strong>Nama Material</strong></div>
+                        <div style='font-size: 12px' id="namaMaterial">-</div>
+                        <div><strong>Manufactured</strong></div>
+                        <div style='font-size: 12px' id="manufactured">-</div>
+                        <div><strong>Supplier</strong></div>
+                        <div style='font-size: 12px' id="supplier">-</div>
+                        <div><strong>Kode Produksi</strong></div>
+                        <div style='font-size: 12px' id="kodeProduksi">-</div>
+                    </div>
+                </div>
+                
+                <table class='note-table'>
+                    <thead>
+                        <tr>
+                            <th colspan='2'>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tgl.Datang</td> 
+                            <td><strong id="tglDatang">-</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Jumlah</td> 
+                            <td><strong id="jumlah">-</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Status Halal</td> 
+                            <td><strong id="statusHalal">-</strong></td>
+                        </tr>
+                        <tr>
+                            <td>PIC</td> 
+                            <td><img id="qrCode" src='https://api.qrserver.com/v1/create-qr-code/?data=PIC&size=50x50' alt='QR Code' width='50' height='50'></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="buttons">
+            <button class="btn" onclick="printLabel()">Print Label</button>
+            <button class="btn btn-success" onclick="exportToPDF()">Export PDF</button>
+            <button class="btn btn-warning" onclick="generateSampleData()">Sample Data</button>
+        </div>
+    </div>
+
+    <script>
+        // Hàm lấy parameters từ URL
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name) || '';
+        }
+
+        // Hàm format tanggal
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID');
+            } catch (e) {
+                return dateString; // Return original if parsing fails
+            }
+        }
+
+        // Hàm format status halal
+        function formatStatusHalal(status) {
+            const statusElement = document.getElementById('statusHalal');
+            const cleanStatus = status?.toLowerCase().trim();
+            
+            switch(cleanStatus) {
+                case 'halal':
+                case 'yes':
+                case 'ya':
+                case 'true':
+                case '1':
+                    statusElement.className = 'status-halal';
+                    return 'HALAL';
+                case 'non-halal':
+                case 'tidak halal':
+                case 'no':
+                case 'tidak':
+                case 'false':
+                case '0':
+                    statusElement.className = 'status-non-halal';
+                    return 'NON-HALAL';
+                default:
+                    statusElement.className = 'status-unknown';
+                    return status || 'UNKNOWN';
+            }
+        }
+
+        // Hàm generate QR Code URL
+        function generateQRCode(picData) {
+            if (!picData) picData = 'PIC';
+            const encodedData = encodeURIComponent(picData);
+            return `https://api.qrserver.com/v1/create-qr-code/?data=${encodedData}&size=50x50`;
+        }
+
+        // Hàm load data dari URL
+        function loadDataFromUrl() {
+            // Load data dasar
+            document.getElementById('namaMaterial').textContent = getUrlParameter('namaMaterial') || '-';
+            document.getElementById('manufactured').textContent = getUrlParameter('manufactured') || '-';
+            document.getElementById('supplier').textContent = getUrlParameter('supplier') || '-';
+            document.getElementById('kodeProduksi').textContent = getUrlParameter('kodeProduksi') || '-';
+            document.getElementById('tglDatang').textContent = formatDate(getUrlParameter('tglDatang')) || '-';
+            document.getElementById('jumlah').textContent = getUrlParameter('jumlah') || '-';
+            
+            // Format status halal dengan styling
+            const statusHalal = formatStatusHalal(getUrlParameter('statusHalal'));
+            document.getElementById('statusHalal').textContent = statusHalal;
+            
+            // Generate QR Code
+            const picData = getUrlParameter('pic') || 'PIC';
+            document.getElementById('qrCode').src = generateQRCode(picData);
+        }
+
+        // Hàm generate sample data
+        function generateSampleData() {
+            const sampleUrl = new URL(window.location.origin + window.location.pathname);
+            const params = {
+                namaMaterial: 'Tepung Terigu Premium',
+                manufactured: '2024-01-15',
+                supplier: 'PT. Supplier ABC',
+                kodeProduksi: 'TP001-2024-A',
+                tglDatang: '2024-02-01',
+                jumlah: '500 KG',
+                statusHalal: 'halal',
+                pic: 'Ahmad Yusuf - QC Inspector'
+            };
+
+            Object.keys(params).forEach(key => {
+                sampleUrl.searchParams.set(key, params[key]);
+            });
+
+            window.location.href = sampleUrl.toString();
+        }
+
+        // Hàm print
+        function printLabel() {
+            window.print();
+        }
+
+        // Hàm export PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('printArea');
+            
+            html2canvas(element, {
+                scale: 3,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(function(canvas) {
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Create PDF with custom size for label (92mm x 92mm)
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: [92, 92]
+                });
+                
+                const imgWidth = 92;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                // Generate filename
+                const materialName = getUrlParameter('namaMaterial') || 'material';
+                const kodeProduksi = getUrlParameter('kodeProduksi') || 'unknown';
+                const fileName = `Label_${materialName.replace(/\s+/g, '_')}_${kodeProduksi}.pdf`;
+                
+                pdf.save(fileName);
+            }).catch(function(error) {
+                console.error('Error generating PDF:', error);
+                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+            });
+        }
+
+        // Hàm untuk mengupdate QR code ketika PIC berubah
+        function updateQRCode() {
+            const picData = document.getElementById('pic').value || 'PIC';
+            document.getElementById('qrCode').src = generateQRCode(picData);
+        }
+
+        // Load data saat halaman dimuat
+        window.onload = function() {
+            loadDataFromUrl();
+            
+            // Jika tidak ada parameter, tampilkan contoh
+            if (!window.location.search) {
+                console.log('Tidak ada parameter URL. Klik "Sample Data" untuk melihat contoh.');
+            }
+        };
+
+        // Event listener untuk perubahan URL (jika menggunakan history API)
+        window.addEventListener('popstate', function(event) {
+            loadDataFromUrl();
+        });
+    </script>
+</body>
+</html>
